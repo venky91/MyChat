@@ -5,8 +5,9 @@ var sockList = {}											// maps a connection id to a socket object
 var list = []												  // list that holds ALL connection id's
 var chatRoom = []											// Room 1, which holds all the connection id's in that room
 var hotTubRoom = []									  // Room 2, which holds all the connection id's in that room
-var HOST = '127.0.0.1';
-var PORT = 30000;
+//var HOST = '54.187.194.143';
+//var HOST = 
+var PORT = 3000;
 
 var connectionCount = 0;
 
@@ -67,6 +68,17 @@ net.createServer(function(sock) {
       if (data == '/join Chat') {
 	    	console.log("Client joined chat");
         chatRoom.push(sock.connId);
+	var message = "entering room: Chat\n";;
+	for (var i = 0; i < chatRoom.length; i++) {
+
+	  message = message.concat("* " + nameMap[chatRoom[i]]);
+	  if (chatRoom[i] == sock.connId) {
+	    message = message.concat(" (** this is you)");
+	  }
+	  message = message.concat("\n");
+	}
+	message = message.concat("end of list");
+	sock.write(message);
       }
       if (data == '/join HotTub') {
 	      console.log("Client joined HoTtub");
@@ -136,4 +148,26 @@ net.createServer(function(sock) {
     delete nameMap[sock.connId];
   });
 
-}).listen(PORT,HOST);
+  sock.on('error', function(err) {
+	
+    if (list.contains(sock.connId)) {
+      list.remove(sock.connId);
+    }	
+    if (chatRoom.contains(sock.connId)) {
+
+      chatRoom.remove(sock.connId);
+    }
+
+    else if (hotTubRoom.contains(sock.connId)) {
+      hotTubRoom.remove(sock.connid);
+
+
+    }
+
+    if (sock.connId in nameMap) {
+
+      delete nameMap[sock.connId];
+    }
+  });
+
+}).listen(PORT);
