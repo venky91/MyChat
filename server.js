@@ -33,7 +33,12 @@ net.createServer(function(sock) {
     data = data.toString('utf8').trim();
     console.log(sock.remotePort);
 
-    if (!(sock.connId in list)) {                                                                      // The user is in the stage of choosing a username
+
+    inList = list.indexOf(sock.connId) != -1
+    inChatRoom = chatRoom.indexOf(sock.connId) != -1
+    inHotTubRoom = hotTubRoom.indexOf(sock.connId) != -1
+
+    if (!inList) {                                                                      // The user is in the stage of choosing a username
 
       for (var key in nameMap) {              
 
@@ -49,10 +54,6 @@ net.createServer(function(sock) {
       sock.write("Welcome " + nameMap[sock.connId]);
       return;
     }
-
-    inList = sock.connId in list
-    inChatRoom = sock.connId in chatRoom
-    inHotTubRoom = sock.connId in hotTubRoom
 
     if (inList && !inChatRoom && !inHotTubRoom) {    // The user is in the main lobby 
 
@@ -99,7 +100,7 @@ net.createServer(function(sock) {
       return;
     }
 
-    if (sock.connId in chatRoom) {                                                                 // Handle data received by a  client in room 'Chat'
+    if (inChatRoom) {                                                                 // Handle data received by a  client in room 'Chat'
       if (data == '/leave') {
         
         for (var i = 0; i < chatRoom.length; i++) {
@@ -119,7 +120,7 @@ net.createServer(function(sock) {
 
     }
 	
-    else if (sock.connId in hotTubRoom) {                                                               // Handle data received by a client in room 'HotTub'
+    else if (inHotTubRoom) {                                                               // Handle data received by a client in room 'HotTub'
       if (data == '/leave') {
         
         for (var i = 0; i < hotTubRoom.length; i++) {
@@ -132,16 +133,14 @@ net.createServer(function(sock) {
       }
 
       for (var i = 0; i < hotTubRoom.length; i++) {
-        if (hotTubRoom[i] != sock.connId) {
           sockList[i].write(nameMap[sock.connId] + ":" + data.toString('utf8').trim());
-        }
       }
 
   }
 
   });
 
-  sock.on('close', function(err) {
+  sock.on('close', function() {
 	
     if (sock.connId in list) {
       console.log('Removed ' + sock.connId + ' from main lobby list')
