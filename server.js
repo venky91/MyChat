@@ -10,17 +10,6 @@ var PORT = 3000;
 
 var connectionCount = 0;
 
-Array.prototype.remove = function() {
-    var what, a = arguments, L = a.length, ax;
-    while (L && this.length) {
-        what = a[--L];
-        while ((ax = this.indexOf(what)) !== -1) {
-            this.splice(L, 1);
-        }
-    }
-    return this;
-};
-
 net.createServer(function(sock) {
 
   console.log('CONNECTED:' + sock.remoteAddress + ':' + sock.remotePort);
@@ -108,7 +97,13 @@ net.createServer(function(sock) {
 			      sockList[chatRoom[i]].write(nameMap[sock.connId]  + " has left the chat");
 			    }
 		    }
-		    chatRoom = chatRoom.remove(sock.connId);
+
+        for (var i = chatRoom.length - 1; i >= 0; i--) {
+          if (chatRoom[i] == sock.connId) {
+            chatRoom.splice(i,1)
+            break
+          }
+        }
 		    return;
       }
 
@@ -128,7 +123,14 @@ net.createServer(function(sock) {
 			      sockList[hotTubRoom[i]].write(nameMap[sock.connId]  + " has left the chat");
 			    }
 		    }
-		    hotTubRoom = hotTubRoom.remove(sock.connId);
+
+        for (var i = hotTubRoom.length - 1; i >= 0; i--) {
+          if (hotTubRoom[i] == sock.connId) {
+            sockList[hotTubRoom[i]].write("You are back in the main lobby")
+            hotTubRoom.splice(i,1)
+            break
+          }
+        }
 		    return;
       }
 
@@ -146,18 +148,39 @@ net.createServer(function(sock) {
 	
     if (list.indexOf(sock.connId) != -1) {
       console.log('Removed ' + sock.connId + ' from main lobby list')
-      list = list.remove(sock.connId);
+
+      for (var i = list.length - 1; i >= 0; i--) {
+        if (list[i] == sock.connId) {
+          list.splice(i, 1)
+          break
+        }
+      }
     }	
+
     if (chatRoom.indexOf(sock.connId) != -1) {
 
       console.log('Removed ' + sock.connId + ' from chat room list')
-      chatRoom = chatRoom.remove(sock.connId);
+      
+      for (var i = chatRoom.lenth - 1; i >= 0; i--) {
+        if (chatRoom[i] == sock.connId) {
+          chatRoom.splice(i, 1)
+          break
+        }
+      }
     }
 
     else if (hotTubRoom.indexOf(sock.connId) != -1) {
     
       console.log('Removed ' + sock.connId + ' from hot tub list')
-      hotTubRoom = hotTubRoom.remove(sock.connid);
+
+      for (var i = hotTubRoom.length - 1; i >=0; i--) {
+        if (hotTubRoom[i] == sock.connId) {
+          hotTubRoom.splice(i, 1)
+          break
+        }
+      }
+
+      console.log(hotTubRoom.length)
     }
 
     if (sock.connId in nameMap) {
