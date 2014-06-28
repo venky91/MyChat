@@ -8,6 +8,8 @@ var hotTubRoom = []									  // Room 2, which holds all the connection id's in 
 var HOST = '127.0.0.1'
 var PORT = 3000;
 
+var connectionCount = 0;
+
 Array.prototype.remove = function() {
     var what, a = arguments, L = a.length, ax;
     while (L && this.length) {
