@@ -8,15 +8,6 @@ var hotTubRoom = []									  // Room 2, which holds all the connection id's in 
 var HOST = '127.0.0.1'
 var PORT = 3000;
 
-var connectionCount = 0;
-
-Array.prototype.contains = function(id) {
-  for (i in this) {
-    if (this[i] == id) return true;
-  }
-  return false;
-}
-
 Array.prototype.remove = function() {
     var what, a = arguments, L = a.length, ax;
     while (L && this.length) {
@@ -40,7 +31,7 @@ net.createServer(function(sock) {
     data = data.toString('utf8').trim();
     console.log(sock.remotePort);
 
-    if (!list.contains(sock.connId)) {                                                                      // The user is in the stage of choosing a username
+    if (!(sock.connId in list)) {                                                                      // The user is in the stage of choosing a username
 
       for (var key in nameMap) {              
 
@@ -57,28 +48,35 @@ net.createServer(function(sock) {
       return;
     }
 
-    if (list.contains(sock.connId) && !chatRoom.contains(sock.connId) && !hotTubRoom.contains(sock.connId)){    // The user is in the main lobby 
+    inList = sock.connId in list
+    inChatRoom = sock.connId in chatRoom
+    inHotTubRoom = sock.connId in hotTubRoom
+
+    if (inList && !inChatRoom && !inHotTubRoom) {    // The user is in the main lobby 
 
       console.log(data);
+
       if (data == '/rooms') {
 
         sock.write("Active rooms are:\n" + "* Chat(" + chatRoom.length + ")\n" + "* HotTub(" + hotTubRoom.length + ")\n" + "end of list");
       }
+
       if (data == '/join Chat') {
 	    	console.log("Client joined chat");
         chatRoom.push(sock.connId);
-	var message = "entering room: Chat\n";;
-	for (var i = 0; i < chatRoom.length; i++) {
+	      var message = "entering room: Chat\n";;
+	      for (var i = 0; i < chatRoom.length; i++) {
 
-	  message = message.concat("* " + nameMap[chatRoom[i]]);
-	  if (chatRoom[i] == sock.connId) {
-	    message = message.concat(" (** this is you)");
-	  }
-	  message = message.concat("\n");
-	}
-	message = message.concat("end of list");
-	sock.write(message);
+	        message = message.concat("* " + nameMap[chatRoom[i]]);
+	        if (chatRoom[i] == sock.connId) {
+	          message = message.concat(" (** this is you)");
+	        }
+	        message = message.concat("\n");
+	      }
+	      message = message.concat("end of list");
+	      sock.write(message);
       }
+
       if (data == '/join HotTub') {
 	      console.log("Client joined HoTtub");
         hotTubRoom.push(sock.connId);
@@ -99,7 +97,7 @@ net.createServer(function(sock) {
       return;
     }
 
-    if (chatRoom.contains(sock.connId)) {                                                                 // Handle data received by a  client in room 'Chat'
+    if (sock.connId in chatRoom) {                                                                 // Handle data received by a  client in room 'Chat'
       if (data == '/leave') {
         
         for (var i = 0; i < chatRoom.length; i++) {
@@ -119,7 +117,7 @@ net.createServer(function(sock) {
 
     }
 	
-	if (hotTubRoom.contains(sock.connId)) {                                                               // Handle data received by a client in room 'HotTub'
+    else if (sock.connId in hotTubRoom) {                                                               // Handle data received by a client in room 'HotTub'
       if (data == '/leave') {
         
         for (var i = 0; i < hotTubRoom.length; i++) {
@@ -141,28 +139,27 @@ net.createServer(function(sock) {
 
   });
 
-  sock.on('close', function(data) {
-    console.log('CLOSED:')
-    list.remove(sock.connId);
-    delete nameMap[sock.connId];
-  });
-
-  sock.on('error', function(err) {
+  sock.on('close', function(err) {
 	
-    if (list.contains(sock.connId)) {
-      list.remove(sock.connId);
+    if (sock.connId in list) {
+      console.log('Removed ' + sock.connId + ' from main lobby list')
+      list = list.remove(sock.connId);
     }	
-    if (chatRoom.contains(sock.connId)) {
+    if (sock.connId in chatRoom) {
 
-      chatRoom.remove(sock.connId);
+      console.log('Removed ' + sock.connId + ' from chat room list')
+      chatRoom = chatRoom.remove(sock.connId);
     }
 
-    else if (hotTubRoom.contains(sock.connId)) {
-      hotTubRoom.remove(sock.connid);
+    else if (sock.connId in hotTubRoom) {
+    
+      console.log('Removed ' + sock.connId + ' from hot tub list')
+      hotTubRoom = hotTubRoom.remove(sock.connid);
     }
 
     if (sock.connId in nameMap) {
 
+      console.log('Removed ' + sock.connId + ' from name map')
       delete nameMap[sock.connId];
     }
   });
