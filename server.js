@@ -165,5 +165,6 @@ net.createServer(function(sock) {
 
       delete nameMap[sock.connId];
     }
+  });
 
 }).listen(PORT, HOST);
