@@ -22,7 +22,6 @@ net.createServer(function(sock) {
     data = data.toString('utf8').trim();
     console.log(sock.remotePort);
 
-
     inList = list.indexOf(sock.connId) != -1
     inChatRoom = chatRoom.indexOf(sock.connId) != -1
     inHotTubRoom = hotTubRoom.indexOf(sock.connId) != -1
@@ -31,16 +30,22 @@ net.createServer(function(sock) {
 
       for (var key in nameMap) {              
 
-        if (data == nameMap[key]) {
+        if (data == nameMap[key]) { 
           sock.write("Already taken");
           return;
         }
       }
 
+      // User is now in the main lobby
       list.push(sock.connId);
       nameMap[sock.connId] = data;
       sockList[sock.connId] = sock;
       sock.write("Welcome " + nameMap[sock.connId]);
+      sock.write("\nUsage:\n" +
+                "/rooms\n" + 
+                "/join <room>\n" +
+                "/leave (to leave the chat room)\n" +
+                "/quit (to quit the program at any time)\n")
       return;
     }
 
@@ -53,7 +58,7 @@ net.createServer(function(sock) {
         sock.write("Active rooms are:\n" + "* Chat(" + chatRoom.length + ")\n" + "* HotTub(" + hotTubRoom.length + ")\n" + "end of list");
       }
 
-      if (data == '/join Chat') {
+      else if (data == '/join Chat') {
 	    	console.log("Client joined chat");
         chatRoom.push(sock.connId);
 	      var message = "entering room: Chat\n";;
@@ -69,7 +74,7 @@ net.createServer(function(sock) {
 	      sock.write(message);
       }
 
-      if (data == '/join HotTub') {
+      else if (data == '/join HotTub') {
 	      console.log("Client joined HoTtub");
         hotTubRoom.push(sock.connId);
         var message = "entering room: HotTub\n";
@@ -84,6 +89,11 @@ net.createServer(function(sock) {
         }
         message = message.concat("end of list");
         sock.write(message);
+      }
+
+      else {
+        message = "\nYou have entered invalid input.\n"
+        sock.write(message)
       }
 
       return;
