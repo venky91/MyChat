@@ -15,7 +15,7 @@ Array.prototype.remove = function() {
     while (L && this.length) {
         what = a[--L];
         while ((ax = this.indexOf(what)) !== -1) {
-            this.splice(ax, 1);
+            this.splice(L, 1);
         }
     }
     return this;
@@ -104,8 +104,8 @@ net.createServer(function(sock) {
       if (data == '/leave') {
         
         for (var i = 0; i < chatRoom.length; i++) {
-			    if (chatRoom[i] != sock.connId) {
-			      sockList[i].write(nameMap[sock.connId]  + " has left the chat");
+			    if (sockList[chatRoom[i]] != sock.connId) {
+			      sockList[chatRoom[i]].write(nameMap[sock.connId]  + " has left the chat");
 			    }
 		    }
 		    chatRoom = chatRoom.remove(sock.connId);
@@ -113,8 +113,8 @@ net.createServer(function(sock) {
       }
 
       for (var i = 0; i < chatRoom.length; i++) {
-        if (chatRoom[i] != sock.connId) {
-          sockList[i].write(nameMap[sock.connId] + ":" + data.toString('utf8').trim());
+        if (sockList[chatRoom[i]] != sock.connId) {
+          sockList[chatRoom[i]].write(nameMap[sock.connId] + ":" + data.toString('utf8').trim());
         }
       }
 
@@ -124,8 +124,8 @@ net.createServer(function(sock) {
       if (data == '/leave') {
         
         for (var i = 0; i < hotTubRoom.length; i++) {
-			    if (hotTubRoom[i] != sock.connId) {
-			      sockList[i].write(nameMap[sock.connId]  + " has left the chat");
+			    if (sockList[hotTubRoom[i]] != sock) {
+			      sockList[hotTubRoom[i]].write(nameMap[sock.connId]  + " has left the chat");
 			    }
 		    }
 		    hotTubRoom = hotTubRoom.remove(sock.connId);
@@ -133,7 +133,9 @@ net.createServer(function(sock) {
       }
 
       for (var i = 0; i < hotTubRoom.length; i++) {
-          sockList[i].write(nameMap[sock.connId] + ":" + data.toString('utf8').trim());
+        if (sockList[hotTubRoom[i]] != sock) {
+          sockList[hotTubRoom[i]].write(nameMap[sock.connId] + ":" + data.toString('utf8').trim());
+        }
       }
 
   }
@@ -142,17 +144,17 @@ net.createServer(function(sock) {
 
   sock.on('close', function() {
 	
-    if (sock.connId in list) {
+    if (list.indexOf(sock.connId) != -1) {
       console.log('Removed ' + sock.connId + ' from main lobby list')
       list = list.remove(sock.connId);
     }	
-    if (sock.connId in chatRoom) {
+    if (chatRoom.indexOf(sock.connId) != -1) {
 
       console.log('Removed ' + sock.connId + ' from chat room list')
       chatRoom = chatRoom.remove(sock.connId);
     }
 
-    else if (sock.connId in hotTubRoom) {
+    else if (hotTubRoom.indexOf(sock.connId) != -1) {
     
       console.log('Removed ' + sock.connId + ' from hot tub list')
       hotTubRoom = hotTubRoom.remove(sock.connid);
