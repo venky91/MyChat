@@ -1,7 +1,6 @@
 var net = require('net')
 var HOST = '127.0.0.1'
 var PORT = 3000
-var inMainLobby = false
 
 console.log("Trying " + HOST + '...');
 
