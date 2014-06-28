@@ -1,14 +1,10 @@
-var args = process.argv.slice(2);
-if (args.length < 2) {
-  console.log("You have entered the wrong number of arguments. Enter both the address followed by the port number");
-  process.exit();
-}
-
-console.log("Trying " + args[0] + '...');
-
 var net = require('net')
-var HOST = args[0];
-var PORT = args[1];
+var HOST = '127.0.0.1'
+var PORT = 3000
+var inMainLobby = false
+
+console.log("Trying " + HOST + '...');
+
 var client = new net.Socket();
 
 function done() {
@@ -26,7 +22,7 @@ client.on('data', function(data) {
 });
 
 client.on('error', function(e) {
-  console.log("You have entered an incorrect address or port number");
+  console.log("Error connecting. The server might be down.")
   process.exit(0);  
 
 });

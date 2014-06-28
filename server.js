@@ -5,8 +5,7 @@ var sockList = {}											// maps a connection id to a socket object
 var list = []												  // list that holds ALL connection id's
 var chatRoom = []											// Room 1, which holds all the connection id's in that room
 var hotTubRoom = []									  // Room 2, which holds all the connection id's in that room
-//var HOST = '54.187.194.143';
-//var HOST = 
+var HOST = '127.0.0.1'
 var PORT = 3000;
 
 var connectionCount = 0;
@@ -160,14 +159,11 @@ net.createServer(function(sock) {
 
     else if (hotTubRoom.contains(sock.connId)) {
       hotTubRoom.remove(sock.connid);
-
-
     }
 
     if (sock.connId in nameMap) {
 
       delete nameMap[sock.connId];
     }
-  });
 
-}).listen(PORT);
+}).listen(PORT, HOST);
